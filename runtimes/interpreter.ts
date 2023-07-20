@@ -11,6 +11,7 @@
  */
 
 import {
+  ArrayLiteral,
   AssignmentExpr,
   BinaryExpr,
   IdentifierLiteral,
@@ -18,14 +19,17 @@ import {
   ObjectExpr,
   Program,
   Stmt,
+  StringLiteral,
   VarDeclaration,
 } from "../core/ast.ts";
 import { Environment } from "./environment.ts";
 import {
+  eval_array_expr,
   eval_assignment_expr,
   eval_binary_expr,
   eval_identifier,
   eval_object_expr,
+  eval_string_expr,
 } from "./eval/expressions.ts";
 import { eval_program, eval_var_declaration } from "./eval/statements.ts";
 import { NumberVal, RuntimeVal } from "./values.ts";
@@ -59,6 +63,10 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
     case "ObjectExpr":
       return eval_object_expr(astNode as ObjectExpr, env);
 
+    case "StringLiteral":
+      return eval_string_expr(astNode as StringLiteral);
+    case "ArrayLiteral":
+      return eval_array_expr(astNode as ArrayLiteral, env);
     default:
       console.error(
         `☢️ : This ASTNode is Currently Not Supported ${

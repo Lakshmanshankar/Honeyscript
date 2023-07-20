@@ -1,14 +1,18 @@
 import {
+  ArrayLiteral,
   AssignmentExpr,
   BinaryExpr,
   IdentifierLiteral,
   ObjectExpr,
+  StringLiteral,
 } from "../../core/ast.ts";
 import { Environment } from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
 import {
+  ArrayVal,
   MK_NULL,
   MK_NUM,
+  MK_STRING,
   NumberVal,
   ObjectVal,
   RuntimeVal,
@@ -72,7 +76,7 @@ export function eval_object_expr(
   obj: ObjectExpr,
   env: Environment,
 ): RuntimeVal {
-  const object = { type: "object" } as ObjectVal;
+  const object = { type: "object", properties: new Map() } as ObjectVal;
   for (const { key, value } of obj.properties) {
     const runtimeValforvalue = (value == undefined)
       ? env.lookup(key)
@@ -81,4 +85,21 @@ export function eval_object_expr(
     object.properties.set(key, runtimeValforvalue);
   }
   return object;
+}
+
+export function eval_array_expr(
+  arr: ArrayLiteral,
+  env: Environment,
+) {
+  const array = { type: "array", elements: [] } as ArrayVal;
+  for (const value of arr.elements) {
+    array.elements.push(evaluate(value, env));
+  }
+  return array;
+}
+
+export function eval_string_expr(
+  str: StringLiteral,
+): RuntimeVal {
+  return MK_STRING(str.value);
 }

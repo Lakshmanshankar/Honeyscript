@@ -1,6 +1,13 @@
 
-
-let x = {
-    y : 100,
-    z : 120
+let foo =12;
+let x ={
+    y:foo,
+    a:{
+        foo:{
+            c:90
+          }
+      }
   };
+
+let all = x.a.foo();
+

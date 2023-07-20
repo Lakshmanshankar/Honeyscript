@@ -1,15 +1,19 @@
 import {
+  ArrayLiteral,
   AssignmentExpr,
   BinaryExpr,
+  CallExpr,
   Expr,
   IdentifierLiteral,
+  MemberExpr,
   NumberLiteral,
   ObjectExpr,
   Program,
   Property,
+  StringLiteral,
   VarDeclaration,
 } from "./ast.ts";
-import { Token, Tokenize, TokenType } from "./lexer.ts";
+import { Token, tokenize, TokenType } from "./lexer.ts";
 
 export class Parser {
   private tokens: Token[] = [];
@@ -31,7 +35,7 @@ export class Parser {
   private expect(type: TokenType, errMsg: string) {
     const prev = this.eat();
     if (prev.type != type) {
-      throw `🍁 parser error\n: ${prev} ${type}${errMsg}`;
+      throw `🍁 parser error\n: ${JSON.stringify(prev)} ${type}${errMsg}`;
     }
     return prev;
   }
@@ -41,7 +45,7 @@ export class Parser {
    * and ProgramNodes Body Contains all other Statements
    */
   produceAST(sourceCode: string): Program {
-    this.tokens = Tokenize(sourceCode);
+    this.tokens = tokenize(sourceCode);
     const program: Program = {
       kind: "Program",
       body: [],
@@ -50,6 +54,7 @@ export class Parser {
     while (this.notEnd()) {
       program.body.push(this.parse_stmt());
     }
+    // console.log(program.body);
 
     return program;
   }
@@ -193,13 +198,13 @@ export class Parser {
   // lhs (Primaryexr) <"/","*","%"> rhs(primary) then assign to lhs
   // returns a primaryExpr
   private parse_multiplicative_expr(): Expr {
-    let lhs = this.parse_primary_expr();
+    let lhs = this.parse_call_and_memeber_expr();
     while (
       this.at().value == "/" || this.at().value == "*" || this.at().value == "%"
     ) {
       const operator = this.eat().value; // "/" or "*" or "%";
       //assign the right hand side ops to lhs
-      const right = this.parse_primary_expr();
+      const right = this.parse_call_and_memeber_expr();
       lhs = {
         kind: "BinaryExpr",
         operator,
@@ -208,6 +213,89 @@ export class Parser {
       } as BinaryExpr;
     }
     return lhs;
+  }
+  private parse_call_and_memeber_expr(): Expr {
+    // foo.bar.() foo.bar will be parsed at parse_memeber_expr
+    const member = this.parse_memeber_expr();
+    if (this.at().type == TokenType.OpenParen) {
+      return this.parse_call_only_expr(member);
+    }
+    return member;
+  }
+
+  // recursively searches till the last open() and return its callExpr to the
+  // parent to the parent ...
+  private parse_call_only_expr(member: Expr): Expr {
+    let call_expr: Expr = {
+      kind: "CallExpr",
+      caller: member,
+      args: this.parse_call_args(),
+    } as CallExpr; // now we parsed atlease one ()
+    // this is chained foo.bar()()
+    if (this.at().type == TokenType.OpenParen) {
+      call_expr = this.parse_call_only_expr(call_expr);
+    }
+    return call_expr;
+  }
+  // there are two cases ) Immediate closing then we return empty []
+  // else we parse the arguments of that ( args1,2,...)
+  private parse_call_args(): Expr[] {
+    this.expect(TokenType.OpenParen, `Expecting and OpenParen after Memeber()`);
+    const args: Expr[] = this.at().type == TokenType.CloseParen
+      ? []
+      : this.parse_argument_list();
+
+    this.expect(TokenType.CloseParen, `Expecting Close ) after callExpr`);
+    return args;
+  }
+
+  // handling ( a+4, n+2 , .....) not this closign parenthis
+  private parse_argument_list(): Expr[] {
+    const args = [this.parse_assignment_expr()];
+    while (this.at().type == TokenType.Comma && this.eat()) {
+      args.push(this.parse_assignment_expr());
+    }
+
+    return args;
+  }
+
+  // foo.bar ->
+  private parse_memeber_expr(): Expr {
+    let object = this.parse_primary_expr(); // get the first foo
+    //now parsing the . or [
+    while (
+      this.at().type == TokenType.Dot || this.at().type == TokenType.OpenBracket
+    ) {
+      const operator = this.eat(); // 😋 can be . or [
+      let property: Expr;
+      let computed: boolean;
+
+      if (operator.type == TokenType.Dot) {
+        computed = false; // foo.bar.. not ()
+        // Ippothan Identifierke varom yeppa (Now we can parse Identifier)
+        // after dot we can only accpt the Indenfier
+        property = this.parse_primary_expr();
+        if (property.kind != "IdentifierLiteral") {
+          throw `Expecting Identifier after dot operator`;
+        }
+      } else { // this may be [bar[]]
+        computed = true;
+        property = this.parse_expr(); // it must be a computed value so parseExpr it
+        this.expect(
+          TokenType.CloseBracket,
+          `Expecting Closing ] after MemeberExpr`,
+        );
+      }
+
+      object = {
+        object,
+        kind: "MemberExpr",
+        computed,
+        property,
+      } as MemberExpr;
+    }
+
+    return object;
   }
 
   private parse_primary_expr(): Expr {
@@ -225,6 +313,13 @@ export class Parser {
           kind: "NumberLiteral",
           value: parseFloat(this.eat().value),
         } as NumberLiteral;
+
+      case TokenType.String:
+        return {
+          kind: "StringLiteral",
+          value: this.eat().value,
+        } as StringLiteral;
+
       case TokenType.OpenParen: {
         this.eat();
         const value = this.parse_expr();
@@ -234,15 +329,25 @@ export class Parser {
         );
         return value;
       }
-
+      case TokenType.Array:
+        return this.parse_object_or_array_expr();
       default:
         console.error(
           `☢️  parser error:\n Unexpected token ${
-            JSON.stringify(this.at().value)
-          }`,
+            JSON.stringify(this.at())
+          }  #${this.at().type}`,
         );
         Deno.exit();
     }
+  }
+  private parse_object_or_array_expr(): Expr {
+    if (this.at().value === "$") {
+      this.eat();
+      const elements = this.parse_argument_list();
+      this.expect(TokenType.Array, "Expecting Closing $ after array");
+      return { kind: "ArrayLiteral", elements } as ArrayLiteral;
+    }
+    throw "Invalid syntax for object or array expression";
   }
 }
 

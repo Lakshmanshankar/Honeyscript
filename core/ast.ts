@@ -1,14 +1,20 @@
 // deno-lint-ignore-file no-empty-interface
 export type NodeType =
+  // Program
   | "Program"
   | "VarDeclaration"
+  // Expr
   | "BinaryExpr"
   | "AssignmentExpr"
-  | "ObjectExpr"
-  | "Property"
+  | "CallExpr"
+  | "MemberExpr"
+  // Literal
   | "NumberLiteral"
+  | "StringLiteral"
+  | "ArrayLiteral"
+  | "ObjectExpr" // ObjectExpr is actually ObjectLiteral I cannot Rename it now
+  | "Property"
   | "IdentifierLiteral";
-
 export interface Stmt {
   kind: NodeType;
 }
@@ -48,6 +54,11 @@ export interface NumberLiteral extends Expr {
   value: number;
 }
 
+export interface StringLiteral extends Expr {
+  kind: "StringLiteral";
+  value: string;
+}
+
 export interface IdentifierLiteral extends Expr {
   kind: "IdentifierLiteral";
   symbol: string;
@@ -63,4 +74,21 @@ export interface Property extends Expr {
 export interface ObjectExpr extends Expr {
   kind: "ObjectExpr";
   properties: Property[];
+}
+
+//foo.bar()() -> ()() callExpr bar -> MemberExpr
+export interface CallExpr extends Expr {
+  kind: "CallExpr";
+  args: Expr[];
+  caller: Expr;
+}
+
+export interface MemberExpr extends Expr {
+  kind: "MemberExpr";
+  object: Expr;
+}
+
+export interface ArrayLiteral extends Expr {
+  kind: "ArrayLiteral";
+  elements: Expr[];
 }
