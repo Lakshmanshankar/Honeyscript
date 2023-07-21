@@ -77,7 +77,7 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(token(src.shift(), TokenType.CloseParen));
     } else if (
       src[0] == "+" || src[0] == "-" || src[0] == "*" || src[0] == "/" ||
-      src[0] == "%"
+      src[0] == "%" || src[0] == ">" || src[0] == "<"
     ) {
       tokens.push(token(src.shift(), TokenType.BinaryOperator));
     } else if (src[0] == "=") {
@@ -121,15 +121,13 @@ export function tokenize(sourceCode: string): Token[] {
     } else if (src[0] == ".") {
       tokens.push(token(src.shift(), TokenType.Dot));
     } // support comments
-    else if (src[0] == "@"){
+    else if (src[0] == "@") {
       src.shift();
-      while (src[0] != "@"){
+      while (src[0] != "@") {
         src.shift();
       }
-      src.shift(); 
-    }
-    
-    else {
+      src.shift();
+    } else {
       // These tokens may  contains
       if (isNumeric(src[0])) {
         let num = "";

@@ -15,7 +15,7 @@ export function createGlobalEnv() {
   // support for native functions
   env.declare(
     "print",
-    MK_NATIVE_FN((args, env) => {
+    MK_NATIVE_FN((args) => {
       console.log(...args);
       return MK_NULL();
     }),
@@ -24,7 +24,7 @@ export function createGlobalEnv() {
 
   env.declare(
     "version",
-    MK_NATIVE_FN((args, env) => {
+    MK_NATIVE_FN(() => {
       console.log(
         "\x1b[1;96m ----------------------------------------------------------\x1b[0m",
       );

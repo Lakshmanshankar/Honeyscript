@@ -179,7 +179,8 @@ export class Parser {
   private parse_additive_expr(): Expr {
     let lhs = this.parse_multiplicative_expr();
     while (
-      this.at().value == "+" || this.at().value == "-"
+      this.at().value == "+" || this.at().value == "-" ||
+      this.at().value == ">" || this.at().value == "<"
     ) {
       const operator = this.eat().value; // "/" or "*" or "%";
       //assign the right hand side ops to lhs
@@ -330,7 +331,7 @@ export class Parser {
         return value;
       }
       case TokenType.Array:
-        return this.parse_object_or_array_expr();
+        return this.parse_array_expr();
       default:
         console.error(
           `☢️  parser error:\n Unexpected token ${
@@ -340,7 +341,7 @@ export class Parser {
         Deno.exit();
     }
   }
-  private parse_object_or_array_expr(): Expr {
+  private parse_array_expr(): Expr {
     if (this.at().value === "$") {
       this.eat();
       const elements = this.parse_argument_list();

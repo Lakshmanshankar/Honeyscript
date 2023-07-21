@@ -11,6 +11,7 @@ import { Environment } from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
 import {
   ArrayVal,
+  MK_BOOL,
   MK_NULL,
   MK_NUM,
   MK_STRING,
@@ -27,15 +28,30 @@ export function eval_binary_expr(
   const lhs = evaluate(binOp.left, env);
   const rhs = evaluate(binOp.right, env);
 
-  if (lhs.type == "number" && rhs.type == "number") {
+  if (binOp.operator === "<") {
+    if (lhs.type === "number" && rhs.type === "number") {
+      return MK_BOOL((lhs as NumberVal).value < (rhs as NumberVal).value);
+    } else {
+      throw "🔥 Relational operators require numeric operands";
+    }
+  } else if (binOp.operator === ">") {
+    if (lhs.type === "number" && rhs.type === "number") {
+      return MK_BOOL((lhs as NumberVal).value > (rhs as NumberVal).value);
+    } else {
+      throw "🔥 Relational operators require numeric operands";
+    }
+  } else if (lhs.type === "number" && rhs.type === "number") {
+    // Handle other arithmetic operators here if you add them in the future
     return eval_numeric_bin_expr(
       lhs as NumberVal,
       rhs as NumberVal,
       binOp.operator,
     );
+  } else {
+    return MK_NULL();
   }
-  return MK_NULL();
 }
+
 // because its like a helper func for eval_binary_expr
 export function eval_numeric_bin_expr(
   left: NumberVal,
@@ -112,9 +128,9 @@ export function eval_call_expr(
 ): RuntimeVal {
   // here we evaluate the arguments
   const args = expr.args.map((arg) => evaluate(arg, env));
-  
+
   // here we evaluate the caller which is a function so we can call it
-  const fn =  evaluate(expr.caller, env) as NativeFnVal;
+  const fn = evaluate(expr.caller, env) as NativeFnVal;
   if (fn.type !== "native-fn") {
     throw `🐬 : ${expr.caller} is not a function`;
   }
