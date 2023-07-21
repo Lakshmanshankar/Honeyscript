@@ -10,8 +10,9 @@ export enum TokenType {
   Const,
   Fn,
   // hopefully add
-  // TODO: After Function calls implement if else atleast
-  // if,else and while 🍒
+  // TODO: Implement While Loop
+  If,
+  Else,
 
   // Literals
   // Null,
@@ -40,6 +41,8 @@ const KEYWORDS: Record<string, TokenType> = {
   let: TokenType.Let,
   const: TokenType.Const,
   fn: TokenType.Fn,
+  if: TokenType.If,
+  else: TokenType.Else,
 };
 
 export interface Token {

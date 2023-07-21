@@ -2,10 +2,12 @@ import {
   ArrayLiteral,
   AssignmentExpr,
   BinaryExpr,
+  BlockStmt,
   CallExpr,
   Expr,
   FunctionDeclaration,
   IdentifierLiteral,
+  IfStatement,
   MemberExpr,
   NumberLiteral,
   ObjectExpr,
@@ -69,10 +71,49 @@ export class Parser {
 
       case TokenType.Fn:
         return this.parse_function_declaration();
+
+      case TokenType.If:
+        return this.parse_if_statement();
       default:
         return this.parse_expr();
     }
   }
+  private parse_if_statement(): Expr {
+    this.expect(TokenType.If, "Expecting 'if' keyword");
+    const testExpr = this.parse_expr(); // needs to be a but NOt to worry we
+    const consquent = this.parse_block_stmt();
+    let alternate: BlockStmt | null = null;
+
+    if (this.at().type == TokenType.Else) {
+      this.eat();
+      alternate = this.parse_block_stmt();
+    }
+    return {
+      kind: "IfStatement",
+      testExpr,
+      consquent,
+      alternate,
+    } as IfStatement;
+  }
+
+  // NOTE: { parse the contents of the if statement now} this will also eat()
+  private parse_block_stmt(): BlockStmt {
+    this.expect(TokenType.OpenBrace, "Expecting '{' before block statement");
+    const body: Stmt[] = [];
+
+    // Parse statements inside the block until reaching '}'
+    while (this.at().type !== TokenType.CloseBrace) {
+      body.push(this.parse_stmt());
+    }
+
+    this.expect(TokenType.CloseBrace, "Expecting '}' after block statement");
+
+    return {
+      kind: "BlockStmt",
+      body,
+    };
+  }
+
   private parse_function_declaration(): Expr {
     this.eat(); // fn
     const name = this.expect(

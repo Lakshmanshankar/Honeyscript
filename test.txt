@@ -1,9 +1,10 @@
 let x = 10;
 let y = 120;
 
-fn add(x,y){
-    let c = x+y;
-    c
-  }
+if (1234 > 120) {
 
-add(1,2)
+   x = 124;
+  } else {
+      x = 1;
+    }
+print(x)

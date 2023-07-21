@@ -4,6 +4,8 @@ export type NodeType =
   | "Program"
   | "VarDeclaration"
   | "FunctionDeclaration"
+  | "IfStatement"
+  | "BlockStmt"
   // Expr
   | "BinaryExpr"
   | "AssignmentExpr"
@@ -99,4 +101,15 @@ export interface FunctionDeclaration extends Expr {
   name: string;
   parameters: string[];
   body: Stmt[];
+}
+
+export interface BlockStmt extends Stmt {
+  kind: "BlockStmt";
+  body: Stmt[];
+}
+export interface IfStatement extends Expr {
+  kind: "IfStatement";
+  testExpr: Expr;
+  consquent: BlockStmt;
+  alternate: BlockStmt | null;
 }

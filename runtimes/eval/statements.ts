@@ -1,11 +1,13 @@
 import {
+  BlockStmt,
   FunctionDeclaration,
+  IfStatement,
   Program,
   VarDeclaration,
 } from "../../core/ast.ts";
 import { Environment } from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { FunctionVal, MK_NULL, RuntimeVal } from "../values.ts";
+import { BooleanVal, FunctionVal, MK_NULL, RuntimeVal } from "../values.ts";
 
 // eval each statement then return the result of last eval statement
 export function eval_program(program: Program, env: Environment): RuntimeVal {
@@ -49,6 +51,39 @@ export function eval_fn_declaration(
     declarationEnv: env,
     body: declaration.body,
   };
-
   return env.declare(declaration.name, func, false);
+}
+
+export function eval_if_statement(
+  ifStmt: IfStatement,
+  env: Environment,
+): RuntimeVal {
+  const testResult = evaluate(ifStmt.testExpr, env) as BooleanVal; // Evaluate the testExpr
+
+  // WARNING: the testExpr may not neccessarily the BinaryExpr it
+  // can also be any value handle that with a separate function (when ?)
+  if (testResult.type !== "boolean") {
+    throw new Error("Condition in if statement must evaluate to a boolean.");
+  }
+
+  if (testResult.value) {
+    // If the condition is true, evaluate the consquent block
+    return eval_block(ifStmt.consquent, env);
+  } else if (ifStmt.alternate) {
+    // If the condition is false and there's an alternate block, evaluate it
+    return eval_block(ifStmt.alternate, env);
+  } else {
+    // If the condition is false and there's no alternate block, return null
+    return MK_NULL();
+  }
+}
+
+function eval_block(block: BlockStmt, env: Environment): RuntimeVal {
+  let result: RuntimeVal = MK_NULL();
+
+  for (const statement of block.body) {
+    result = evaluate(statement, env);
+  }
+
+  return result;
 }

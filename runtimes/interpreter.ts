@@ -17,6 +17,7 @@ import {
   CallExpr,
   FunctionDeclaration,
   IdentifierLiteral,
+  IfStatement,
   NumberLiteral,
   ObjectExpr,
   Program,
@@ -36,6 +37,7 @@ import {
 } from "./eval/expressions.ts";
 import {
   eval_fn_declaration,
+  eval_if_statement,
   eval_program,
   eval_var_declaration,
 } from "./eval/statements.ts";
@@ -78,6 +80,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_call_expr(astNode as CallExpr, env);
     case "FunctionDeclaration":
       return eval_fn_declaration(astNode as FunctionDeclaration, env);
+    case "IfStatement":
+      return eval_if_statement(astNode as IfStatement, env);
 
     default:
       console.error(
