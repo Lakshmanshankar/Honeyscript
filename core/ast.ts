@@ -5,6 +5,7 @@ export type NodeType =
   | "VarDeclaration"
   | "FunctionDeclaration"
   | "IfStatement"
+  | "WhileStatement"
   | "BlockStmt"
   // Expr
   | "BinaryExpr"
@@ -112,4 +113,11 @@ export interface IfStatement extends Expr {
   testExpr: Expr;
   consquent: BlockStmt;
   alternate: BlockStmt | null;
+}
+
+
+export interface WhileStatement extends Expr {
+  kind: "WhileStatement";
+  testExpr: Expr;
+  consquent: BlockStmt;
 }

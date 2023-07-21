@@ -16,6 +16,7 @@ import {
   Stmt,
   StringLiteral,
   VarDeclaration,
+WhileStatement,
 } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
@@ -74,10 +75,25 @@ export class Parser {
 
       case TokenType.If:
         return this.parse_if_statement();
+
+      case TokenType.While:
+          return this.parse_while_statement();
       default:
         return this.parse_expr();
     }
   }
+  
+private parse_while_statement(): Expr {
+  this.expect(TokenType.While,`Expecting keyword 'while' `)
+  const testExpr = this.parse_expr(); // needs to be a but NOt to worry we
+    const consquent = this.parse_block_stmt();
+    return {
+      kind: "WhileStatement",
+      testExpr,
+      consquent,
+    } as WhileStatement;
+  }
+
   private parse_if_statement(): Expr {
     this.expect(TokenType.If, "Expecting 'if' keyword");
     const testExpr = this.parse_expr(); // needs to be a but NOt to worry we
