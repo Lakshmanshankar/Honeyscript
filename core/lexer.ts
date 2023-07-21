@@ -120,7 +120,16 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(token(src.shift(), TokenType.CloseBracket));
     } else if (src[0] == ".") {
       tokens.push(token(src.shift(), TokenType.Dot));
-    } else {
+    } // support comments
+    else if (src[0] == "@"){
+      src.shift();
+      while (src[0] != "@"){
+        src.shift();
+      }
+      src.shift(); 
+    }
+    
+    else {
       // These tokens may  contains
       if (isNumeric(src[0])) {
         let num = "";

@@ -1,13 +1,16 @@
 // These are the Runtime Values that are Created form
 // the Program Body -> Runtime
 
+import { Environment } from "./environment.ts";
+
 export type ValueType =
   | "null"
   | "number"
   | "boolean"
   | "object"
   | "string"
-  | "array";
+  | "array"
+  | "native-fn"
 
 // All the values are inherited from the Runtime Val which
 // only have a type attribute
@@ -47,6 +50,13 @@ export interface ArrayVal extends RuntimeVal {
   elements: RuntimeVal[];
 }
 
+export type FunctionCall = (args:RuntimeVal[],env:Environment)=> RuntimeVal;
+
+export interface NativeFnVal extends RuntimeVal {
+  type: "native-fn";
+  call: FunctionCall;
+}
+
 // Macros that will return RuntimeValues
 export function MK_NULL() {
   return { type: "null", value: null } as NullVal;
@@ -63,3 +73,14 @@ export function MK_STRING(val: string) {
 export function MK_NUM(val: number) {
   return { type: "number", value: val } as NumberVal;
 }
+
+
+export function MK_NATIVE_FN(call: FunctionCall) {
+  return { type:"native-fn",call} as NativeFnVal;
+} 
+
+/**
+ * MK_NATIVE((args:RuntimeVal[],env of that args[])=>{
+ *   do stuff here /
+ * })
+ */

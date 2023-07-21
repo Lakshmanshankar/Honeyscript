@@ -1,13 +1,4 @@
+let x = $ 1 ,2, 3 ,4, 5 $;
 
-let foo =12;
-let x ={
-    y:foo,
-    a:{
-        foo:{
-            c:90
-          }
-      }
-  };
-
-let all = x.a.foo();
-
+print(x)
+version()

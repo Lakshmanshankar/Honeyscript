@@ -2,6 +2,7 @@ import {
   ArrayLiteral,
   AssignmentExpr,
   BinaryExpr,
+  CallExpr,
   IdentifierLiteral,
   ObjectExpr,
   StringLiteral,
@@ -13,6 +14,7 @@ import {
   MK_NULL,
   MK_NUM,
   MK_STRING,
+  NativeFnVal,
   NumberVal,
   ObjectVal,
   RuntimeVal,
@@ -102,4 +104,21 @@ export function eval_string_expr(
   str: StringLiteral,
 ): RuntimeVal {
   return MK_STRING(str.value);
+}
+
+export function eval_call_expr(
+  expr: CallExpr,
+  env: Environment,
+): RuntimeVal {
+  // here we evaluate the arguments
+  const args = expr.args.map((arg) => evaluate(arg, env));
+  
+  // here we evaluate the caller which is a function so we can call it
+  const fn =  evaluate(expr.caller, env) as NativeFnVal;
+  if (fn.type !== "native-fn") {
+    throw `🐬 : ${expr.caller} is not a function`;
+  }
+
+  // here we call the function with the arguments
+  return fn.call(args, env);
 }
