@@ -3,16 +3,17 @@ export type NodeType =
   // Program
   | "Program"
   | "VarDeclaration"
+  | "FunctionDeclaration"
   // Expr
   | "BinaryExpr"
   | "AssignmentExpr"
   | "CallExpr"
   | "MemberExpr"
+  | "ObjectExpr" // ArrayExpr ! ArrayLiteral
+  | "ArrayLiteral"
   // Literal
   | "NumberLiteral"
   | "StringLiteral"
-  | "ArrayLiteral"
-  | "ObjectExpr" // ObjectExpr is actually ObjectLiteral I cannot Rename it now
   | "Property"
   | "IdentifierLiteral";
 export interface Stmt {
@@ -91,4 +92,11 @@ export interface MemberExpr extends Expr {
 export interface ArrayLiteral extends Expr {
   kind: "ArrayLiteral";
   elements: Expr[];
+}
+
+export interface FunctionDeclaration extends Expr {
+  kind: "FunctionDeclaration";
+  name: string;
+  parameters: string[];
+  body: Stmt[];
 }

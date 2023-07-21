@@ -11,6 +11,7 @@ import { Environment } from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
 import {
   ArrayVal,
+  FunctionVal,
   MK_BOOL,
   MK_NULL,
   MK_NUM,
@@ -131,10 +132,37 @@ export function eval_call_expr(
 
   // here we evaluate the caller which is a function so we can call it
   const fn = evaluate(expr.caller, env) as NativeFnVal;
-  if (fn.type !== "native-fn") {
-    throw `🐬 : ${expr.caller} is not a function`;
+  if (fn.type === "native-fn") {
+    return fn.call(args, env);
+  }
+  if (fn.type === "function") {
+    const func = fn as unknown as FunctionVal;
+    // this will create a closure for the variables decalred inside of the function
+    const scope = new Environment(func.declarationEnv);
+    // NOTE: About Parmeteres and arguments
+    //Now we can assign the parameters to the scope but before that there is one catch
+    //We need to check that the args passed to this CallExpr should matchup with the no of parameters that the
+    //function takes
+
+    // WARNING: This will not accurately validate the args with parameters
+    if (isArgsValidForParams(args, func.parameters)) {
+      for (let i = 0; i < func.parameters.length; i++) {
+        scope.declare(func.parameters[i], args[i], false);
+      }
+    }
+
+    // Now we set all the env for the current func Block eval the body itself
+    let fnReturnVal: RuntimeVal = MK_NULL(); // func () blocks may be empty;
+    for (const stmt of func.body) {
+      fnReturnVal = evaluate(stmt, scope);
+    }
+    return fnReturnVal;
   }
 
+  throw `🐬 : ${expr.caller} is not a function`;
   // here we call the function with the arguments
-  return fn.call(args, env);
+}
+
+function isArgsValidForParams(args: RuntimeVal[], parameters: string[]) {
+  return args.length === parameters.length;
 }

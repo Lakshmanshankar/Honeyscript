@@ -15,6 +15,7 @@ import {
   AssignmentExpr,
   BinaryExpr,
   CallExpr,
+  FunctionDeclaration,
   IdentifierLiteral,
   NumberLiteral,
   ObjectExpr,
@@ -33,7 +34,11 @@ import {
   eval_object_expr,
   eval_string_expr,
 } from "./eval/expressions.ts";
-import { eval_program, eval_var_declaration } from "./eval/statements.ts";
+import {
+  eval_fn_declaration,
+  eval_program,
+  eval_var_declaration,
+} from "./eval/statements.ts";
 import { NumberVal, RuntimeVal } from "./values.ts";
 
 // this will parse every node in the AST then returns a Runtime Value which is the result
@@ -69,8 +74,11 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_string_expr(astNode as StringLiteral);
     case "ArrayLiteral":
       return eval_array_expr(astNode as ArrayLiteral, env);
-      case "CallExpr":
-        return eval_call_expr(astNode as CallExpr, env);
+    case "CallExpr":
+      return eval_call_expr(astNode as CallExpr, env);
+    case "FunctionDeclaration":
+      return eval_fn_declaration(astNode as FunctionDeclaration, env);
+
     default:
       console.error(
         `☢️ : This ASTNode is Currently Not Supported ${

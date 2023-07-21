@@ -4,12 +4,14 @@ import {
   BinaryExpr,
   CallExpr,
   Expr,
+  FunctionDeclaration,
   IdentifierLiteral,
   MemberExpr,
   NumberLiteral,
   ObjectExpr,
   Program,
   Property,
+  Stmt,
   StringLiteral,
   VarDeclaration,
 } from "./ast.ts";
@@ -64,9 +66,56 @@ export class Parser {
       case TokenType.Let:
       case TokenType.Const:
         return this.parse_var_declaration();
+
+      case TokenType.Fn:
+        return this.parse_function_declaration();
       default:
         return this.parse_expr();
     }
+  }
+  private parse_function_declaration(): Expr {
+    this.eat(); // fn
+    const name = this.expect(
+      TokenType.Identifier,
+      `Expecting FunctionName after keyword fn`,
+    ).value;
+    console.log(this.at(), name);
+
+    // now parameters
+    const parameters: string[] = [];
+    const args = this.parse_call_args();
+    for (const arg of args) {
+      if (arg.kind !== "IdentifierLiteral") {
+        throw ` function parameters should be strings IdentifierLiterals`;
+      }
+      const val = arg as IdentifierLiteral;
+      parameters.push(val.symbol);
+    }
+    // alright now we just have he { block };
+
+    const body: Stmt[] = [];
+    this.expect(
+      TokenType.OpenBrace,
+      `Expecting OpenBrace after function parameters`,
+    );
+
+    while (
+      this.at().type != TokenType.EOF && this.at().type != TokenType.CloseBrace
+    ) {
+      body.push(this.parse_stmt());
+    }
+
+    this.expect(
+      TokenType.CloseBrace,
+      `Expecting closing } after function definition`,
+    );
+
+    return {
+      name,
+      kind: "FunctionDeclaration",
+      parameters,
+      body,
+    } as FunctionDeclaration;
   }
   private parse_var_declaration(): Expr {
     const isConstant = this.eat().type == TokenType.Const;

@@ -1,7 +1,11 @@
-import { Program, VarDeclaration } from "../../core/ast.ts";
+import {
+  FunctionDeclaration,
+  Program,
+  VarDeclaration,
+} from "../../core/ast.ts";
 import { Environment } from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { MK_NULL, RuntimeVal } from "../values.ts";
+import { FunctionVal, MK_NULL, RuntimeVal } from "../values.ts";
 
 // eval each statement then return the result of last eval statement
 export function eval_program(program: Program, env: Environment): RuntimeVal {
@@ -32,4 +36,19 @@ export function eval_var_declaration(
     value,
     declaration.constant,
   ) as RuntimeVal;
+}
+
+export function eval_fn_declaration(
+  declaration: FunctionDeclaration,
+  env: Environment,
+): RuntimeVal {
+  const func: FunctionVal = {
+    type: "function",
+    name: declaration.name,
+    parameters: declaration.parameters,
+    declarationEnv: env,
+    body: declaration.body,
+  };
+
+  return env.declare(declaration.name, func, false);
 }

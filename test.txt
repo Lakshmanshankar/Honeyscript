@@ -1,4 +1,9 @@
-let x = $ 1 ,2, 3 ,4, 5 $;
+let x = 10;
+let y = 120;
 
-print(x)
-version()
+fn add(x,y){
+    let c = x+y;
+    c
+  }
+
+add(1,2)

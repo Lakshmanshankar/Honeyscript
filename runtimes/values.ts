@@ -1,6 +1,7 @@
 // These are the Runtime Values that are Created form
 // the Program Body -> Runtime
 
+import { Stmt } from "../core/ast.ts";
 import { Environment } from "./environment.ts";
 
 export type ValueType =
@@ -11,6 +12,7 @@ export type ValueType =
   | "string"
   | "array"
   | "native-fn"
+  | "function";
 
 // All the values are inherited from the Runtime Val which
 // only have a type attribute
@@ -50,11 +52,19 @@ export interface ArrayVal extends RuntimeVal {
   elements: RuntimeVal[];
 }
 
-export type FunctionCall = (args:RuntimeVal[],env:Environment)=> RuntimeVal;
+export type FunctionCall = (args: RuntimeVal[], env: Environment) => RuntimeVal;
 
 export interface NativeFnVal extends RuntimeVal {
   type: "native-fn";
   call: FunctionCall;
+}
+
+export interface FunctionVal extends RuntimeVal {
+  type: "function";
+  name: string;
+  parameters: string[];
+  declarationEnv: Environment;
+  body: Stmt[];
 }
 
 // Macros that will return RuntimeValues
@@ -74,13 +84,13 @@ export function MK_NUM(val: number) {
   return { type: "number", value: val } as NumberVal;
 }
 
-
 export function MK_NATIVE_FN(call: FunctionCall) {
-  return { type:"native-fn",call} as NativeFnVal;
-} 
+  return { type: "native-fn", call } as NativeFnVal;
+}
 
 /**
  * MK_NATIVE((args:RuntimeVal[],env of that args[])=>{
  *   do stuff here /
  * })
  */
+
