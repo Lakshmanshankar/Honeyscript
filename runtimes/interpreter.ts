@@ -24,6 +24,7 @@ import {
   Stmt,
   StringLiteral,
   VarDeclaration,
+WhileStatement,
 } from "../core/ast.ts";
 import { Environment } from "./environment.ts";
 import {
@@ -40,6 +41,7 @@ import {
   eval_if_statement,
   eval_program,
   eval_var_declaration,
+eval_while_statement,
 } from "./eval/statements.ts";
 import { NumberVal, RuntimeVal } from "./values.ts";
 
@@ -82,7 +84,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_fn_declaration(astNode as FunctionDeclaration, env);
     case "IfStatement":
       return eval_if_statement(astNode as IfStatement, env);
-
+    case "WhileStatement":
+        return eval_while_statement(astNode as WhileStatement, env)
     default:
       console.error(
         `☢️ : This ASTNode is Currently Not Supported ${

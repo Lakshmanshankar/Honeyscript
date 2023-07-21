@@ -4,6 +4,7 @@ import {
   IfStatement,
   Program,
   VarDeclaration,
+WhileStatement,
 } from "../../core/ast.ts";
 import { Environment } from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
@@ -86,4 +87,22 @@ function eval_block(block: BlockStmt, env: Environment): RuntimeVal {
   }
 
   return result;
+}
+
+
+export function eval_while_statement(
+  whileStmt:WhileStatement,
+  env:Environment
+):RuntimeVal {
+  while (true) {
+    const testExpr = evaluate(whileStmt.testExpr, env) as BooleanVal;
+
+    if (!testExpr.value) {
+      // If the test expression is falsy, break the loop
+      return MK_NULL();
+    }
+
+    // Evaluate the consequent block
+    eval_block(whileStmt.consquent, env);
+  }
 }

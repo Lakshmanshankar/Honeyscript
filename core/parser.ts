@@ -82,7 +82,6 @@ export class Parser {
         return this.parse_expr();
     }
   }
-  
 private parse_while_statement(): Expr {
   this.expect(TokenType.While,`Expecting keyword 'while' `)
   const testExpr = this.parse_expr(); // needs to be a but NOt to worry we
@@ -93,7 +92,6 @@ private parse_while_statement(): Expr {
       consquent,
     } as WhileStatement;
   }
-
   private parse_if_statement(): Expr {
     this.expect(TokenType.If, "Expecting 'if' keyword");
     const testExpr = this.parse_expr(); // needs to be a but NOt to worry we
