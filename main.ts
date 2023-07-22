@@ -13,7 +13,7 @@ async function run(sourceFile: string) {
   // console.log(input);
 
   const program = parser.produceAST(input);
-  console.log(program); // if u want to see the ASTnodes
+  // console.log(program); // if u want to see the ASTnodes
   //
   const result = evaluate(program, env); // { kind:"Program", body:[stmts]}
   console.log(result);

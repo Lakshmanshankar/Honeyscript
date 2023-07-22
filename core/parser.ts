@@ -16,7 +16,7 @@ import {
   Stmt,
   StringLiteral,
   VarDeclaration,
-WhileStatement,
+  WhileStatement,
 } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
@@ -77,14 +77,14 @@ export class Parser {
         return this.parse_if_statement();
 
       case TokenType.While:
-          return this.parse_while_statement();
+        return this.parse_while_statement();
       default:
         return this.parse_expr();
     }
   }
-private parse_while_statement(): Expr {
-  this.expect(TokenType.While,`Expecting keyword 'while' `)
-  const testExpr = this.parse_expr(); // needs to be a but NOt to worry we
+  private parse_while_statement(): Expr {
+    this.expect(TokenType.While, `Expecting keyword 'while' `);
+    const testExpr = this.parse_expr(); // needs to be a but NOt to worry we
     const consquent = this.parse_block_stmt();
     return {
       kind: "WhileStatement",
@@ -134,7 +134,7 @@ private parse_while_statement(): Expr {
       TokenType.Identifier,
       `Expecting FunctionName after keyword fn`,
     ).value;
-    console.log(this.at(), name);
+    // console.log(this.at(), name);
 
     // now parameters
     const parameters: string[] = [];

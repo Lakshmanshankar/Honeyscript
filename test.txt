@@ -1,6 +1,26 @@
-let x = 10;
 
-while ( x > 0){
-  print(x)
-  x = x - 1;
+
+version()
+let x = 102;
+fn oddOrEven(x){
+  let y = x % 2;
+  if ( y < 1 ) {
+    print('Even Number')
+  }else {
+    print('Odd Number')
+  }
+}
+@ Solve a classic oddOrEven Problem to testThe HoneyScript @
+print(oddOrEven(x)) 
+
+
+@ bit more complex Fibonacci series @
+let a = 0;
+let b = 1;
+let c = 0;
+while (a < 5){
+  print(a)
+  c = a+b;
+  a = b;
+  b = c;
 }
